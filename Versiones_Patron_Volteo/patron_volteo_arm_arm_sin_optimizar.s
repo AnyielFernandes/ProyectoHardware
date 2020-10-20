@@ -32,9 +32,9 @@
 	
 patron_volteo_arm_arm
 
-	STMDB R13!, {r3-r11,lr}
+	STMDB R13!, {r4-r9,lr}
 
-	ADD R4,R13,#40		;R4=@ de par�metros pasadas por pila
+	ADD R4,R13,#28		;R4=@ de par�metros pasadas por pila
 	LDMIA R4,{R4-R6}	;R4=SF, R5=SC y R6=color
 	
 	ADD R2,R2,R4		;FA=FA+SF (Obviamos la operaci�n AND)
@@ -57,8 +57,9 @@ fin_ficha_valida_arm
 	 
 	CMP R7,R6			;casilla!=color
 	CMPNE R8,#0			;posicion_valida!=0 (==1)
-	BEQ patron_no_encontrado
-	
+	MOVEQ R0,#0			;Patr�n no encontrado
+	BEQ fin
+
 	LDR R9,[R1]			;R9=longitud 
 	
 comienzo_while
@@ -90,18 +91,14 @@ fin_while
 
 	STR R9,[R1]			;Guardar longitud (flip)
 
-	CMP R9,#0			;longitud>0
-	CMPNE R8,#0			;posicion_valida!=0 (==1)
-	ADDNE R0,R6,R7		;sumamos la ficha con el color
-	ANDNE R0,R0,#1		;comprobamos el bit de paridad
-	CMPNE R0,#1			;si son iguales (bit paridad a 0), si son distintas (bit paridad a 1)
-	MOVNE R0,#1			;Patr�n encontrado
+	CMP R6,R7 			;ficha==color
+	CMPEQ R8,#1			;posicion_valida==1
+	SUBEQ R9,#1			;restamos 1 a longitud
+	LSREQS R9,R9,#31	;miramos si el bit de signo es 0 (positivo -> longitud>0)
+	MOVEQ R0,#1			;Patr�n encontrado
+	MOVNE R0,#0			;Patr�n no encontrado
 	
-patron_no_encontrado
-
-	MOVEQ R0,#0			;Patr�n no encontrado
-	
-
-	LDMIA R13!, {r3-r11,pc}
+fin
+	LDMIA R13!, {r4-r9,pc}
 	
 	END
