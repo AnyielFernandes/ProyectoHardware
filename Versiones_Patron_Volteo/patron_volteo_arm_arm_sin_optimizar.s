@@ -1,3 +1,13 @@
+;---------------------------------------------------------------
+;	Fichero: patron_volteo_arm_arm_sin_optimizar.s
+;	Autores: Carlos Borau González, 778280
+;		     Anyiel Fernandes Araujo, 779374
+; 	Última Modificación: 21/10/2020
+;	Descripción: Versión en código ensamblador de patron_volteo.
+; 			     Se realiza inlinig de ficha_valida y se aplican
+; 				 optimizaciones. 
+;---------------------------------------------------------------
+
 	AREA codigo, CODE, READONLY
 	
 	EXPORT 	patron_volteo_arm_arm		

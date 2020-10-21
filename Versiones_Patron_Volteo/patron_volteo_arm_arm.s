@@ -1,3 +1,13 @@
+;---------------------------------------------------------------
+;	Fichero: patron_volteo_arm_arm.s
+;	Autores: Carlos Borau González, 778280
+;		     Anyiel Fernandes Araujo, 779374
+; 	Última Modificación: 21/10/2020
+;	Descripción: Versión en código ensamblador de patron_volteo.
+; 			     Se realiza inlinig de ficha_valida y se aplican
+; 				 optimizaciones. 
+;---------------------------------------------------------------
+
 	AREA codigo, CODE, READONLY
 	
 	EXPORT 	patron_volteo_arm_arm		
@@ -25,7 +35,7 @@
 ;		-R5 -> Para guardar la dirección de columna en la que comprobar el patrón
 ;		-R6 -> Para guardar el color de la última ficha colocada en el tablero
 ;		-R7 -> Para guardar la ficha a comprobar en el tablero
-;		-R8 -> Para guardar si la posición de la casilla comprobada es válida o no
+;		-R8 -> Registro temporal, se utiliza para realizar comparaciones.
 ;		-R9 -> Para guardar la longitud del patrón encontrado
 ;
 ;------------------------------------------------------------------------------------
@@ -49,15 +59,15 @@ ficha_valida_arm
 	ADDLT R7,R0,R2,LSL #3	;Momentaneamente R7 se utiliza para indexar tablero
 	LDRBLT R7,[R7,R3]		;R7=ficha[f][c]
 	NEGLTS R8, R7			;tablero[f][c] != CASILLA_VACIA
-	MOVGE R0, #0			;posicion_valida = 0
+	MOVGE R0, #0			;return NO_HAY_PATRON
 	BGE return
 	
 fin_ficha_valida_arm
 	 
 	CMP R7,R6			;casilla!=color
-	MOVEQ R0,#0
+	MOVEQ R0,#0			;return NO_HAY_PATRON
 	BEQ return
-	
+	 
 	LDR R9,[R1]			;R9=longitud 
 ;--------------	
 comienzo_while
@@ -75,8 +85,8 @@ ficha_valida_arm_while
 	ADDLT R7,R0,R2,LSL #3
 	LDRBLT R7,[R7,R3]		;R7=ficha[f][c]
 	NEGLTS R8, R7			;tablero[f][c] != CASILLA_VACIA
-	MOVGE R0, #0			;posicion_valida = 0
-	STRGE R9, [R1]
+	MOVGE R0, #0			;return NO_HAY_PATRON
+	STRGE R9, [R1]			;Se guarda el valor de longitud
 	BGE return
 	
 fin_ficha_valida_arm_while	
@@ -88,9 +98,9 @@ fin_while
 ;--------------	
 
 	STR R9,[R1]			;Guardar longitud (flip)
-	CMP R9,#0
-	MOVGT R0,#1
-	MOVLE R0,#0
+	CMP R9,#0			;longitud > 0
+	MOVGT R0,#1			;return PATRON_ENCONTRADO
+	MOVLE R0,#0			;return NO_HAY_PATRON
 	
 return
 
